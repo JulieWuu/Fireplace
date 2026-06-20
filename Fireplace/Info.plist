@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>UIAppFonts</key>
+	<array>
+		<string>NunitoSans-VariableFont_YTLC,opsz,wdth,wght.ttf</string>
+		<string>Ubuntu-Regular.ttf</string>
+		<string>Renogare-Regular.otf</string>
+		<string>KomikaAxis.ttf</string>
+		<string>LTBinaryNeue.ttf</string>
+		<string>LTBinaryNeue-Black.ttf</string>
+		<string>LTBinaryNeue-Bold.ttf</string>
+	</array>
+</dict>
+</plist>

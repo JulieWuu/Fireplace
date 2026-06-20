@@ -10,9 +10,22 @@
 		8A0AC8AF2FAB865D001E38E6 /* Fireplace.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Fireplace.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		8A0AC8D82FB149FD001E38E6 /* Exceptions for "Fireplace" folder in "Fireplace" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 8A0AC8AE2FAB865D001E38E6 /* Fireplace */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		8A0AC8B12FAB865D001E38E6 /* Fireplace */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				8A0AC8D82FB149FD001E38E6 /* Exceptions for "Fireplace" folder in "Fireplace" target */,
+			);
 			path = Fireplace;
 			sourceTree = "<group>";
 		};
@@ -256,6 +269,7 @@
 				DEVELOPMENT_TEAM = T3ZX6C7QQH;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Fireplace/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -288,6 +302,7 @@
 				DEVELOPMENT_TEAM = T3ZX6C7QQH;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Fireplace/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
