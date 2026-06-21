@@ -19,7 +19,7 @@ struct MainMenuView: View {
     @State private var showTodaysTasksSheet: Bool = false
 
     var todaysCompletions: [TaskCompletion] {
-        let start = startOfCustomDay()
+        let start = Calendar.current.startOfCustomDay()
         return taskCompletions.filter {
             $0.getCompletionTime() >= start
         }
@@ -96,35 +96,6 @@ struct MainMenuView: View {
                 .presentationBackground(Color("DefaultBG"))
         }
     }
-    
-    // returns the last day boundary passed before now, default boundary = 3am
-    func startOfCustomDay(hour: Int = 3, minute: Int = 0) -> Date {
-        let calendar = Calendar.current
-        let now = Date()
-
-        var components = calendar.dateComponents(
-            [.year, .month, .day],
-            from: now
-        )
-        components.hour = hour
-        components.minute = minute
-        components.second = 0
-
-        let todayAtBoundary = calendar.date(from: components)!
-        
-        // If current time is BEFORE 3am, use yesterday's 3am
-        if now < todayAtBoundary {
-            return calendar.date(
-                byAdding: .day,
-                value: -1,
-                to: todayAtBoundary
-            )!
-        }
-
-        // Otherwise use today's 3am
-        return todayAtBoundary
-    }
-    
 }
 
 struct TodaysTaskView: View {

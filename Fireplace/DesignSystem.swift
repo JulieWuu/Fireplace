@@ -11,11 +11,12 @@ import SwiftUI
 struct AppContentStyle: ViewModifier {
     var size: CGFloat
     var weight: Font.Weight
+    var color: Color
     
     func body(content: Content) -> some View {
         content
             .font(.custom("Nunito Sans", size: size).weight(weight))
-            .foregroundColor(.white)
+            .foregroundColor(color)
     }
 }
 
@@ -95,8 +96,8 @@ struct AppButtonStyle: ButtonStyle {
 }
 
 extension View {
-    func appContentStyle(size: CGFloat = 18, weight: Font.Weight = .regular) -> some View {
-        self.modifier(AppContentStyle(size: size, weight: weight))
+    func appContentStyle(size: CGFloat = 18, weight: Font.Weight = .regular, color: Color = .white) -> some View {
+        self.modifier(AppContentStyle(size: size, weight: weight, color: color))
     }
     
     func komikaText(size: CGFloat = 16) -> some View {
