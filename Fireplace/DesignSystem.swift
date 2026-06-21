@@ -58,14 +58,26 @@ struct AppTextFieldStyle: ViewModifier {
 struct ListRowStyle: ViewModifier {
     func body(content: Content) -> some View {
         content
+            .padding(.horizontal, 25)
             .listSectionSeparator(.hidden)
             .listRowSeparator(.hidden)
             .background(Color.clear)
             .listRowBackground(
                 RoundedRectangle(cornerRadius: 10)
                     .fill(Color(.black).opacity(0.3))
-                    .padding(3))
-            .listRowInsets(EdgeInsets(top: 15, leading: 25, bottom: 15, trailing: 25))
+                    .padding(.vertical, 3)
+                    .padding(.horizontal, 20)
+            )
+            .listRowInsets(.vertical, 15)
+    }
+}
+
+struct ListStyle: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .scrollContentBackground(.hidden)
+            .scrollIndicators(.hidden)
+            .listStyle(.plain)
     }
 }
 
@@ -112,8 +124,12 @@ extension View {
         self.modifier(AppTextFieldStyle(size: size))
     }
     
-    func taskListStyle() -> some View {
+    func taskItemStyle() -> some View {
         self.modifier(ListRowStyle())
+    }
+    
+    func taskListStyle() -> some View {
+        self.modifier(ListStyle())
     }
     
 }

@@ -8,6 +8,8 @@
 
 import SwiftUI
 import SwiftData
+
+// original code displaying each task completion
 /*
 struct CalendarView: View {
     
@@ -29,7 +31,7 @@ struct CalendarView: View {
                         Text("Completed: \(task.getName()) at \(taskCompletion.getCompletionTime())")
                             .appContentStyle()
                     }
-                    .taskListStyle()
+                    .taskItemStyle()
                 }
                 .scrollContentBackground(.hidden)
                     
@@ -42,96 +44,175 @@ struct CalendarView: View {
 struct CalendarView: View {
     
     @State private var currentMonthDate = Date()
+    @Query private var completedTasks: [TaskCompletion]
     
     private let columns = Array(
         repeating: GridItem(.flexible(), spacing: 4), count: 7)
+    private let rowHeight: CGFloat = 50
     
     var body: some View {
-        VStack(spacing: 16) {
-            Text("Calendar")
-                .renogareText(size: 36)
-                .padding(.bottom, 10)
+        
+        ZStack {
+            Color("DefaultBG")
+                .ignoresSafeArea(.all)
             
-            HStack {
-                Button(action: { moveMonth(by: -1) }) {
-                    Image(systemName: "chevron.left")
-                }
-                .buttonStyle(.appButtonCustom(
-                    backgroundColor: .white.opacity(0.1),
-                    horizontalPadding: 15
-                ))
-                
-                Spacer()
-                
-                Text(formatMonthYear(currentMonthDate))
-                    .renogareText(size: 24)
-                
-                Spacer()
-                
-                Button(action: { moveMonth(by: 1) }) {
-                    Image(systemName: "chevron.right")
-                }
-                .buttonStyle(.appButtonCustom(
-                    backgroundColor: .white.opacity(0.1),
-                    horizontalPadding: 15
-                ))
-            }
-            .padding(.horizontal)
+            LinearGradient(
+                colors: [Color("DefaultBG"), Color("Overlay").opacity(1)],
+                startPoint: .center,
+                endPoint: .bottom
+            )
+            .ignoresSafeArea(.all)
             
-            HStack(spacing: 0) {
-                ForEach(["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"], id: \.self) { day in
-                    Text(day)
-                        .appContentStyle(size: 14, weight: .bold)
-                        .frame(maxWidth: .infinity)
-                }
-            }
-            .padding(.horizontal)
-            
-            LazyVGrid(columns: columns, spacing: 4) {
-                ForEach(0..<getStartingSpaces(), id: \.self) { _ in
-                    Color.clear
-                        .frame(height: 80)
-                }
+            VStack(spacing: 16) {
                 
-                ForEach(1...getDaysInMonth(), id: \.self) { dayNumber in
-                    let cellDate = generateDate(for: dayNumber)
+                // year
+                HStack {
+                    Button(action: { moveYear(by: -1) }) {
+                        Image(systemName: "chevron.left.2")
+                    }
+                    .buttonStyle(.appButtonCustom(
+                        backgroundColor: .white.opacity(0.1),
+                        horizontalPadding: 15
+                    ))
                     
-                    CalendarDayCell(
-                        dayNumber: dayNumber,
-                        date: cellDate,
-                        // TODO: fix isToday logic
-                        isToday: false
-                    )
+                    Spacer()
+                    
+                    Text(formatYear(currentMonthDate))
+                        .renogareText(size: 36)
+                    
+                    Spacer()
+                    
+                    Button(action: { moveYear(by: 1) }) {
+                        Image(systemName: "chevron.right.2")
+                    }
+                    .buttonStyle(.appButtonCustom(
+                        backgroundColor: .white.opacity(0.1),
+                        horizontalPadding: 15
+                    ))
                 }
-                .padding(.vertical, 1)
-                .padding(.horizontal, 1)
+                .padding(.horizontal)
+                
+                // month
+                HStack {
+                    Button(action: { moveMonth(by: -1) }) {
+                        Image(systemName: "chevron.left")
+                    }
+                    .buttonStyle(.appButtonCustom(
+                        backgroundColor: .white.opacity(0.1),
+                        horizontalPadding: 15
+                    ))
+                    
+                    Spacer()
+                    
+                    Text(formatMonth(currentMonthDate))
+                        .renogareText(size: 24)
+                    
+                    Spacer()
+                    
+                    Button(action: { moveMonth(by: 1) }) {
+                        Image(systemName: "chevron.right")
+                    }
+                    .buttonStyle(.appButtonCustom(
+                        backgroundColor: .white.opacity(0.1),
+                        horizontalPadding: 15
+                    ))
+                }
+                .padding(.horizontal)
+                .padding(.bottom, 10)
+                
+                // grid headings
+                HStack(spacing: 0) {
+                    ForEach(["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"], id: \.self) { day in
+                        Text(day)
+                            .appContentStyle(size: 16, weight: .bold)
+                            .frame(maxWidth: .infinity)
+                    }
+                }
+                .padding(.horizontal)
+                
+                // grid of dates
+                LazyVGrid(columns: columns, spacing: 4) {
+                    ForEach(selectedMonthDates) { day in
+                        CalendarDayCell(day: day, isToday: false, height: rowHeight)
+                            .padding(1)
+                    }
+                }
+                .padding(.horizontal)
+                
+                // tasks completions list
+                VStack(spacing: 0) {
+                    HStack {
+                        Text("Tasks completed: ")
+                            .renogareText(size: 18)
+                            .padding(.top, 20)
+                            .padding(.horizontal)
+                        
+                        Spacer()
+                    }
+                    
+                    List {
+                        ForEach(completedTasks) { taskCompletion in
+                            let task = taskCompletion.getTask()
+                            Text("Completed: \(task.getName()) at \(taskCompletion.getCompletionTime())")
+                                .appContentStyle()
+                        }.taskItemStyle()
+                    }
+                    .taskListStyle()
+                }
             }
-            .padding(.horizontal)
-            
-            Spacer()
-            
         }
-        .background(Color("DefaultBG").ignoresSafeArea())
+        .background(Color("DefaultBG").ignoresSafeArea(.all))
     }
     
-    // --- 🔑 DATABASE & MATHEMATICS LOGIC HELPER FUNCTIONS ---
-    
-    private func getDaysInMonth() -> Int {
-        let range = Calendar.current.range(of: .day, in: .month, for: currentMonthDate)!
-        return range.count
+    var selectedMonthDates: [Day] {
+        return extractMonthDates(currentMonthDate)
     }
     
-    private func getStartingSpaces() -> Int {
-        let components = Calendar.current.dateComponents([.year, .month], from: currentMonthDate)
-        let firstOfMonth = Calendar.current.date(from: components)!
-        let weekday = Calendar.current.component(.weekday, from: firstOfMonth)
-        return weekday - 1 // Returns how many blank slots we need before Day 1
-    }
-    
-    private func generateDate(for day: Int) -> Date {
-        var components = Calendar.current.dateComponents([.year, .month], from: currentMonthDate)
-        components.day = day
-        return Calendar.current.date(from: components) ?? Date()
+    private func extractMonthDates(_ month: Date) -> [Day] {
+        var days: [Day] = []
+        let calendar = Calendar.current
+        let formatter = DateFormatter()
+        formatter.dateFormat = "dd"
+        
+        // locate first day in the month
+        let components = calendar.dateComponents([.year, .month], from: month)
+        guard let firstDayOfMonth = calendar.date(from: components) else {
+            return days
+        }
+        
+        // repeatedly adding (number of days) in the month to the first day
+        guard let range = calendar.range(of: .day, in: .month, for: month)?.compactMap({
+            value -> Date? in
+            return calendar.date(byAdding: .day, value: value - 1, to: firstDayOfMonth)
+        })
+        else {
+            return days
+        }
+        
+        // locate first weekday of the month to add excess days of previous month
+        let firstWeekDay = calendar.component(.weekday, from: range.first!)
+        for index in Array(0..<firstWeekDay - 1).reversed() {
+            guard let date = calendar.date(byAdding: .day, value: -index - 1, to: range.first!) else { return days }
+            let shortSymbol = formatter.string(from: date)
+            days.append(.init(shortSymbol: shortSymbol, date: date, ignored: true))
+        }
+        
+        range.forEach { date in
+            let shortSymbol = formatter.string(from: date)
+            days.append(.init(shortSymbol: shortSymbol, date: date))
+        }
+        
+        // locate last weekday of the month to add excess days of next month
+        let lastWeekDay = 7 - calendar.component(.weekday, from: range.last!)
+        if lastWeekDay > 0 {
+            for index in 0..<lastWeekDay {
+                guard let date = calendar.date(byAdding: .day, value: index + 1, to: range.last!) else { return days }
+                let shortSymbol = formatter.string(from: date)
+                days.append(.init(shortSymbol: shortSymbol, date: date, ignored: true))
+            }
+        }
+        
+        return days
     }
     
     private func moveMonth(by value: Int) {
@@ -140,36 +221,44 @@ struct CalendarView: View {
         }
     }
     
-    private func formatMonthYear(_ date: Date) -> String {
+    private func moveYear(by value: Int) {
+        if let newDate = Calendar.current.date(byAdding: .year, value: value, to: currentMonthDate) {
+            currentMonthDate = newDate
+        }
+    }
+    
+    private func formatYear(_ date: Date) -> String {
         let formatter = DateFormatter()
-        formatter.dateFormat = "MMMM yyyy"
+        formatter.dateFormat = "yyyy"
+        return formatter.string(from: date)
+    }
+
+    private func formatMonth(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMMM"
         return formatter.string(from: date)
     }
 }
 
 struct CalendarDayCell: View {
-    let dayNumber: Int
-    let date: Date
+    let day: Day
     let isToday: Bool
+    let height: CGFloat
     
     var totalWoodCollected: Int {
-        if dayNumber == 12 { return 14 }
-        if dayNumber == 15 { return 6 }
+        if day.shortSymbol == "06" { return 14 }
+        if day.shortSymbol == "15" { return 6 }
         return 0
     }
     
     var body: some View {
         ZStack(alignment: .top) {
-            if isToday {
-                Color.blue.opacity(0.4)
+            VStack {
+                Text(day.shortSymbol)
+                    .appContentStyle(color: day.ignored ? .gray : .white)
+                    .padding(.top, 4)
+                Spacer()
             }
-            else {
-                Color.gray.opacity(0.3)
-            }
-            
-            Text("\(dayNumber)")
-                .appContentStyle(size: 14, weight: .bold)
-                .padding(.top, 4)
             
             if totalWoodCollected > 0 {
                 VStack(spacing: 0) {
@@ -179,16 +268,20 @@ struct CalendarDayCell: View {
                         .appContentStyle(size: 16)
                         .padding(.bottom, 4)
                     
-                    Text("\(totalWoodCollected) 🪵")
-                        .appContentStyle(size: 12, weight: .bold, color: .brown)
-                        .padding(.bottom, 5)
                 }
                 .frame(maxWidth: .infinity, alignment: .bottom)
             }
         }
-        .frame(height: 80)
+        .frame(height: height)
         .cornerRadius(10)
     }
+}
+
+struct Day: Identifiable {
+    var id: UUID = .init()
+    var shortSymbol: String
+    var date: Date
+    var ignored: Bool = false
 }
 
 #Preview {

@@ -84,7 +84,6 @@ struct MainMenuView: View {
             )
             .presentationDetents([.medium, .large, .fraction(0.85)])
             .presentationBackground(Color("DefaultBG"))
-            .presentationBackgroundInteraction(.enabled)
         }
         .sheet(isPresented: $showClaimWoodsSheet) {
             ClaimWoodsView(
@@ -92,8 +91,8 @@ struct MainMenuView: View {
                     showTodaysTasksSheet = true
                 }
             )
-                .presentationDetents([.large, .medium, .fraction(0.85)])
-                .presentationBackground(Color("DefaultBG"))
+            .presentationDetents([.large, .medium, .fraction(0.85)])
+            .presentationBackground(Color("DefaultBG"))
         }
     }
 }
@@ -126,13 +125,13 @@ struct TodaysTaskView: View {
                             Spacer().frame(width: 10)
                             
                             Text("\(task.getWood()) 🪵")
-                                .appContentStyle()
+                                .appContentStyle(weight: .bold)
                             
                             Text(taskCompletion.getCompletionTime(), style: .time)
                                 .appContentStyle()
                                 .frame(width: 60)
                         }
-                        .taskListStyle()
+                        .taskItemStyle()
                         .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                             Button(role: .destructive) {
                                 deleteTaskCompletion(taskCompletion: taskCompletion)
@@ -142,7 +141,7 @@ struct TodaysTaskView: View {
                         }
                     }
                 }
-                .scrollContentBackground(.hidden)
+                .taskListStyle()
             }
             
             VStack {
@@ -192,14 +191,15 @@ struct ClaimWoodsView: View {
                             HStack {
                                 Text("\(task.getIcon())  \(task.getName())").appContentStyle()
                                 Spacer()
-                                Text("🪵 × \(task.getWood())").appContentStyle()
+                                Text("🪵 × \(task.getWood())")
+                                    .appContentStyle(weight: .bold)
                             }
                         }
                         .buttonStyle(.plain)
                     }
-                }.taskListStyle()
+                }.taskItemStyle()
             }
-            .scrollContentBackground(.hidden)
+            .taskListStyle()
         }
     }
 }

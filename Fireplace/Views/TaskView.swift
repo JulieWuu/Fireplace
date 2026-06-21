@@ -41,6 +41,12 @@ struct TaskView: View {
         ZStack {
             Color("DefaultBG")
                 .ignoresSafeArea(.all)
+            
+            Image("CartoonFire")
+                .resizable()
+                .scaledToFit()
+                .offset(y: 30)
+                .opacity(0.2)
 
             List {
                 Section() {
@@ -88,9 +94,8 @@ struct TaskView: View {
                             .tint(.blue)
                         }
                     }
-                    .taskListStyle()
+                    .taskItemStyle()
                 }
-                .listRowInsets(EdgeInsets())
                 .listRowBackground(Color.clear)
                 
                 Section() {
@@ -141,15 +146,14 @@ struct TaskView: View {
                                 }
                                 .tint(.green)
                             }
-                        }.taskListStyle()
+                        }.taskItemStyle()
                     }
                     
                 }
-                .listRowInsets(EdgeInsets())
                 .listRowBackground(Color.clear)
                 
             }
-            .scrollContentBackground(.hidden)
+            .taskListStyle()
             .sheet(item: $taskToEdit) { task in
                 AddTaskView(taskToEdit: task)
             }
