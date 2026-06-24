@@ -9,43 +9,12 @@
 import SwiftUI
 import SwiftData
 
-// original code displaying each task completion
-/*
 struct CalendarView: View {
     
+    @State private var currentMonthDate = Calendar.current.startOfCustomDay()
     @Query private var completedTasks: [TaskCompletion]
     
-    var body: some View {
-        ZStack {
-            Color("DefaultBG")
-                .ignoresSafeArea(.all)
-            
-            VStack {
-                Text(" Calendar ")
-                    .renogareText(size: 36)
-                    .padding(.top)
-                
-                List {
-                    ForEach(completedTasks) { taskCompletion in
-                        let task = taskCompletion.getTask()
-                        Text("Completed: \(task.getName()) at \(taskCompletion.getCompletionTime())")
-                            .appContentStyle()
-                    }
-                    .taskItemStyle()
-                }
-                .scrollContentBackground(.hidden)
-                    
-            }
-        }
-    }
-    
-}*/
-
-struct CalendarView: View {
-    
-    @State private var currentMonthDate = Date()
-    @Query private var completedTasks: [TaskCompletion]
-    
+    private let today = Calendar.current.startOfCustomDay()
     private let columns = Array(
         repeating: GridItem(.flexible(), spacing: 4), count: 7)
     private let rowHeight: CGFloat = 50
@@ -75,12 +44,12 @@ struct CalendarView: View {
                         horizontalPadding: 15
                     ))
                     
-                    Spacer()
+                    Spacer().frame(width: 16)
                     
                     Text(formatYear(currentMonthDate))
                         .renogareText(size: 36)
                     
-                    Spacer()
+                    Spacer().frame(width: 16)
                     
                     Button(action: { moveYear(by: 1) }) {
                         Image(systemName: "chevron.right.2")
@@ -88,6 +57,18 @@ struct CalendarView: View {
                     .buttonStyle(.appButtonCustom(
                         backgroundColor: .white.opacity(0.1),
                         horizontalPadding: 15
+                    ))
+                    
+                    Spacer()
+                    
+                    Button("Today") {
+                        currentMonthDate = today
+                    }
+                    .buttonStyle(.appButtonCustom(
+                        backgroundColor: .blue,
+                        textSize: 20,
+                        verticalPadding: 10,
+                        horizontalPadding: 16,
                     ))
                 }
                 .padding(.horizontal)
@@ -133,14 +114,19 @@ struct CalendarView: View {
                 // grid of dates
                 LazyVGrid(columns: columns, spacing: 4) {
                     ForEach(selectedMonthDates) { day in
-                        CalendarDayCell(day: day, isToday: false, height: rowHeight)
-                            .padding(1)
+                        CalendarDayCell(
+                            day: day,
+                            isToday: Calendar.current.startOfCustomDay(for: day.date) == today,
+                            isSelected: Calendar.current.startOfCustomDay(for: day.date) == currentMonthDate,
+                            height: rowHeight,
+                            currentMonthDate: $currentMonthDate
+                        ).padding(1)
                     }
                 }
                 .padding(.horizontal)
                 
                 // tasks completions list
-                VStack(spacing: 0) {
+                VStack {
                     HStack {
                         Text("Tasks completed: ")
                             .renogareText(size: 18)
@@ -149,6 +135,8 @@ struct CalendarView: View {
                         
                         Spacer()
                     }
+                    
+                    Spacer().frame(height: 10)
                     
                     List {
                         ForEach(completedTasks) { taskCompletion in
@@ -162,6 +150,9 @@ struct CalendarView: View {
             }
         }
         .background(Color("DefaultBG").ignoresSafeArea(.all))
+        .onChange(of: currentMonthDate) {
+            print(currentMonthDate)
+        }
     }
     
     var selectedMonthDates: [Day] {
@@ -175,7 +166,10 @@ struct CalendarView: View {
         formatter.dateFormat = "dd"
         
         // locate first day in the month
-        let components = calendar.dateComponents([.year, .month], from: month)
+        var components = calendar.dateComponents([.year, .month], from: month)
+        components.hour = calendar.customDayStartHour
+        components.minute = calendar.customDayStartMinute
+        components.second = 0
         guard let firstDayOfMonth = calendar.date(from: components) else {
             return days
         }
@@ -243,7 +237,10 @@ struct CalendarView: View {
 struct CalendarDayCell: View {
     let day: Day
     let isToday: Bool
+    let isSelected: Bool
     let height: CGFloat
+    
+    @Binding var currentMonthDate: Date
     
     var totalWoodCollected: Int {
         if day.shortSymbol == "06" { return 14 }
@@ -252,28 +249,37 @@ struct CalendarDayCell: View {
     }
     
     var body: some View {
-        ZStack(alignment: .top) {
-            VStack {
-                Text(day.shortSymbol)
-                    .appContentStyle(color: day.ignored ? .gray : .white)
-                    .padding(.top, 4)
-                Spacer()
-            }
-            
-            if totalWoodCollected > 0 {
-                VStack(spacing: 0) {
+        Button {
+            currentMonthDate = day.date
+        } label: {
+            ZStack {
+                VStack {
+                    Text(day.shortSymbol)
+                        .appContentStyle(color: day.ignored ? .gray : .white)
+                        .padding(.top, 4)
                     Spacer()
-                    
-                    Text("🔥")
-                        .appContentStyle(size: 16)
-                        .padding(.bottom, 4)
-                    
                 }
-                .frame(maxWidth: .infinity, alignment: .bottom)
+                
+                if totalWoodCollected > 0 {
+                    VStack(spacing: 0) {
+                        Spacer()
+                        
+                        Text("🔥")
+                            .appContentStyle(size: 16)
+                            .padding(.bottom, 4)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .bottom)
+                }
             }
+            .frame(height: height)
+            .frame(maxWidth: .infinity)
         }
-        .frame(height: height)
-        .cornerRadius(10)
+        .buttonStyle(.appButtonCustom(
+            backgroundColor: isSelected ? Color.blue.opacity(0.7)
+            : isToday ? Color.blue.opacity(0.2) : Color.white.opacity(0.1),
+            verticalPadding: 0,
+            horizontalPadding: 0,
+        ))
     }
 }
 
